@@ -4,8 +4,6 @@ project(Researches_upon_Task_Scheduling_of_Heterogeneous_Parallel_System
 
 set(CMAKE_CXX_STANDARD 17)
 
-include_directories(code)
-
 add_subdirectory(code/main)
 add_subdirectory(code/structs)
 add_subdirectory(code/algorithm)
