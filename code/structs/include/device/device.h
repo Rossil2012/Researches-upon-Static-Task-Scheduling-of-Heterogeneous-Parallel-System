@@ -1,5 +1,3 @@
-#include <__bit_reference>
-
 #ifndef SCHEDULE_STRUCTS_DEVICE_H_
 #define SCHEDULE_STRUCTS_DEVICE_H_
 
