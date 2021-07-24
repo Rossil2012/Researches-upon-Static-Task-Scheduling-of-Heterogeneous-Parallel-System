@@ -1,6 +1,7 @@
 #ifndef SCHEDULE_STRUCTS_TASK_NODE_H_
 #define SCHEDULE_STRUCTS_TASK_NODE_H_
 
+#include "global.h"
 #include "graph/graph.h"
 
 using LogicalTime = uint64_t;

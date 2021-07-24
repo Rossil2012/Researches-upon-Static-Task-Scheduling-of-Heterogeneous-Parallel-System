@@ -4,6 +4,7 @@
 #include <map>
 #include <unordered_map>
 
+#include "global.h"
 #include "graph/graph.h"
 #include "task/task.h"
 

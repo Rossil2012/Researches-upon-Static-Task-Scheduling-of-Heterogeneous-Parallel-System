@@ -1,6 +1,7 @@
 #ifndef SCHEDULE_STRUCTS_DEVICE_DEVICE_H_
 #define SCHEDULE_STRUCTS_DEVICE_DEVICE_H_
 
+#include "global.h"
 #include "graph/graph.h"
 
 class DeviceGraph;

@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "global.h"
+
 using NodeID = uint64_t;
 
 class Node;

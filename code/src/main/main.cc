@@ -1,9 +1,7 @@
 #include <iostream>
 
 #include "graph/graph.h"
-#include "ga/ga.h"
 #include "ga/ga_nl.h"
-#include "helper/helper.h"
 
 void debugPrint(const std::vector<int> &vec) {
     for (const auto &item : vec) {
@@ -54,7 +52,7 @@ std::vector<Tasklet> GenRandomTaskFlow() {
 }
 
 void testGA() {
-    const TaskID task_num = 100;
+    const TaskID task_num = 1000;
     const double task_edge_prob = 0.01;
     const DeviceID device_num = 5;
 

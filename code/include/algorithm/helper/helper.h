@@ -1,12 +1,13 @@
 #ifndef SCHEDULE_ALGORITHM_HELPER_H_
 #define SCHEDULE_ALGORITHM_HELPER_H_
 
+#include <algorithm>
 #include <queue>
 #include <random>
 
 #include "device/device.h"
 #include "device/device_graph.h"
-#include "task/task.h"
+//#include "task/task.h"
 #include "task/task_graph.h"
 
 struct ScheduleResult {

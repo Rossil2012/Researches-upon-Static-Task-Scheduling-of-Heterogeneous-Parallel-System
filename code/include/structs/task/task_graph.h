@@ -1,6 +1,7 @@
 #ifndef SCHEDULE_STRUCTS_TASK_GRAPH_H_
 #define SCHEDULE_STRUCTS_TASK_GRAPH_H_
 
+#include "global.h"
 #include "graph/graph.h"
 #include "task.h"
 
