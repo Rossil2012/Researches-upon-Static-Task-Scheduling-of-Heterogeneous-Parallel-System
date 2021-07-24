@@ -1,9 +1,14 @@
 project(algorithm)
 
 set(SOURCES
-        src/ga.cc)
+        src/helper/helper.cc
+        src/ga/ga.cc
+        src/ga/ga_pa.cc
+        src/ga/ga_nl.cc
+        src/ls/ls.cc
+        src/ls/ls_nl.cc)
 
-add_library(${PROJECT_NAME} ${SOURCES})
+add_library(${PROJECT_NAME} STATIC ${SOURCES})
 add_library(schedule::algorithm ALIAS ${PROJECT_NAME})
 
 include_directories(../structs/include)
