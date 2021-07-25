@@ -47,9 +47,8 @@ ScheduleResult GetExecResultWithPA(const TaskGraphPtr &task_graph,
 }
 
 bool RandomWithProbability(double prob) {
-    static std::random_device dev;
     static std::uniform_real_distribution<double> u(0, 1);
-    static std::default_random_engine e(dev());
+    static std::default_random_engine e(g_random_device());
     return u(e) <= prob;
 }
 

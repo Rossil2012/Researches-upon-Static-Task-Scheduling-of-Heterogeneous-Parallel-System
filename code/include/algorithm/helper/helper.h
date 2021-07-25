@@ -5,10 +5,13 @@
 #include <queue>
 #include <random>
 
+#include "global.h"
 #include "device/device.h"
 #include "device/device_graph.h"
-//#include "task/task.h"
+#include "task/task.h"
 #include "task/task_graph.h"
+
+extern std::random_device g_random_device;
 
 struct ScheduleResult {
     std::vector<DeviceID> allocation;
@@ -25,16 +28,14 @@ std::vector<TaskPtr> CreateNodeListFromPriority(const TaskGraphPtr &task_graph, 
 
 template <typename T>
 T RandomWithRange(T low, T high) {  // [low, high)
-    std::random_device dev;
     std::uniform_int_distribution<T> u(low, high-1);
-    std::default_random_engine e(dev());
+    std::default_random_engine e(g_random_device());
     return u(e);
 }
 
 template <typename T>
 void ShuffleVector(std::vector<T> &vec) {
-    static std::random_device dev;
-    static std::default_random_engine e(dev());
+    std::default_random_engine e(g_random_device());
     std::shuffle(vec.begin(), vec.end(), e);
 }
 

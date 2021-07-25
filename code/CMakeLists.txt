@@ -19,11 +19,13 @@ set(STRUCTS_SRC
 
 add_library(algorithm ${ALGORITHM_SRC})
 add_library(structs ${STRUCTS_SRC})
+add_library(global src/global.cc)
 
 add_executable(main
         src/main/main.cc)
 
 target_link_libraries(main PRIVATE
+        global
         algorithm
         structs)
 

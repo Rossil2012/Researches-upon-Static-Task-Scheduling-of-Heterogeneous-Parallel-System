@@ -6,5 +6,8 @@
 #include <functional>
 #include <future>
 #include <memory>
+#include <random>
+
+extern std::random_device g_random_device;
 
 #endif //SCHEDULE_INCLUDE_GLOBAL_H_
