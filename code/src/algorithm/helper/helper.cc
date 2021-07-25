@@ -15,7 +15,8 @@ static LogicalTime CalculateMaxExecTimeFromTask(const TaskPtr &from,
     for (const auto &to_ : from->out_nodes) {
         auto to = std::dynamic_pointer_cast<Task>(to_.lock());
         auto to_device = device_graph->GetDevice(allocation[to->node_id]);
-        LogicalTime comm_time = from_device->GetCommTimeWithDevice(to_device, from->output_size);
+        LogicalTime comm_time = device_graph->GetCommTimeBetweenDevices(
+                from_device->node_id, to_device->node_id, from->output_size);
         ret = std::max(ret, CalculateMaxExecTimeFromTask(to, device_graph, allocation, max_exec_time)
                                 + comp_time + comm_time);
     }

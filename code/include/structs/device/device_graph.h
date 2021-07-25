@@ -17,7 +17,8 @@ public:
 
     void Traverse(const std::function<void(DevicePtr &)> &callback);
 
-    inline void AddEdge(DeviceID a, NodeID b) override {
+    inline void AddEdge(DeviceID a, NodeID b, size_t bandwidth) {
+        (*bandwidth_map_)[a * node_num_ + b] = (*bandwidth_map_)[b * node_num_ + a] = bandwidth;
         all_nodes_[a]->addInNode(all_nodes_[b]);
         all_nodes_[a]->addOutNode(all_nodes_[b]);
         all_nodes_[b]->addInNode(all_nodes_[a]);
@@ -40,7 +41,18 @@ public:
         return id;
     }
 
+    inline void NewNodeFinished() {
+        node_num_ = all_nodes_.size();
+        bandwidth_map_ = new std::vector<size_t>(node_num_ * node_num_, 0);
+    }
+
+    LogicalTime GetCommTimeBetweenDevices(DeviceID from, DeviceID to, size_t data_size) const;
+
     DeviceGraphPtr Clone() const;
+
+protected:
+    size_t node_num_ = 0;
+    std::vector<size_t> *bandwidth_map_ = nullptr;  // unit of bandwidth: kb/s
 };
 
 #endif //SCHEDULE_STRUCTS_DEVICE_DEVICE_H_

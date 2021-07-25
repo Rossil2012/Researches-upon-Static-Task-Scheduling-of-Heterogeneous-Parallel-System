@@ -25,6 +25,11 @@ public:
         return id;
     }
 
+    virtual inline void AddEdge(NodeID from, NodeID to) {
+        all_nodes_[from]->addOutNode(all_nodes_[to]);
+        all_nodes_[to]->addInNode(all_nodes_[from]);
+    }
+
     inline TaskID NewTask(size_t output_size, std::vector<Tasklet> &&task_flow) {
         auto task = TaskPtr(new Task(output_size, std::move(task_flow)));
         TaskID id = all_nodes_.size();

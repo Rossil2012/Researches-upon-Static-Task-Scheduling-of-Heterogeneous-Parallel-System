@@ -8,7 +8,7 @@
 #include "graph/graph.h"
 #include "task/task.h"
 
-constexpr static LogicalTime LogicalTimeGain = 100;
+constexpr static LogicalTime LogicalTimeGain = 100; // which means 1 ns = 100 LogicalTime
 
 using DeviceID = uint64_t;
 
@@ -43,8 +43,6 @@ public:
           avail_memory_(memory_constraint) {}
 
     Device(const Device &ano) = default;
-
-    LogicalTime GetCommTimeWithDevice(const DevicePtr &device, size_t data_size) const;
 
     inline void AddTaskToSchedule(TaskPtr &task, LogicalTime start_time, LogicalTime exec_time) {
         task->allocated_to = node_id;
@@ -94,9 +92,10 @@ public:
         AVX512  // 16 float/int32, 8 double/int64   |   x8
     };
 
+    // unit of frequency: GHz
     explicit CPU(SIMD support_isa, size_t memory_constraint, double frequency, size_t num_core)
         : Device(memory_constraint),
-          ps_per_cycle_(1.0 / frequency),
+          ns_per_cycle_(1.0 / frequency),
           num_core_(num_core) {
         switch (support_isa) {
             case None:
@@ -129,7 +128,7 @@ public:
     DevicePtr Clone() const override;
 
 private:
-    double ps_per_cycle_;
+    double ns_per_cycle_;
     size_t num_core_;
 
     std::vector<size_t> process_cap;    // INT32, INT64, FLOAT, DOUBLE
@@ -139,7 +138,7 @@ class GPU : public Device {
 public:
     explicit GPU(size_t memory_constraint, double frequency, size_t num_cuda)
         : Device(memory_constraint),
-          ps_per_cycle_(1.0 / frequency),
+          ns_per_cycle_(1.0 / frequency),
           num_cuda_(num_cuda) {}
     GPU(const GPU &ano) = default;
 
@@ -147,7 +146,7 @@ public:
     DevicePtr Clone() const override;
 
 private:
-    double ps_per_cycle_;
+    double ns_per_cycle_;
     size_t num_cuda_;
 };
 

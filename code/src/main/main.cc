@@ -52,7 +52,7 @@ std::vector<Tasklet> GenRandomTaskFlow() {
 }
 
 void testGA() {
-    const TaskID task_num = 10000;
+    const TaskID task_num = 3000;
     const double task_edge_prob = 0.01;
     const DeviceID device_num = 5;
 
@@ -78,6 +78,14 @@ void testGA() {
     device_graph->NewCPU(CPU::None, 100 << 20, 2.3, 2);
     device_graph->NewGPU(200 << 20, 1.3, 2000);
     device_graph->NewGPU(20 << 20, 1.8, 4000);
+
+    device_graph->NewNodeFinished();
+
+    for (int i = 0 ; i < device_num; i++) {
+        for (int j = i + 1; j < device_num; j++) {
+            device_graph->AddEdge(i, j, RandomWithRange<size_t>(100, 10000));
+        }
+    }
 
 
     auto ga_nl = GA_NL(task_graph, device_graph);

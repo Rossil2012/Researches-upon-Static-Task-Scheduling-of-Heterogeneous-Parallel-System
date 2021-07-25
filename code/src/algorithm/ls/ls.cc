@@ -23,8 +23,9 @@ LogicalTime LS::earliestTimeOnDevice(const TaskPtr &task, const DevicePtr &devic
         auto from = std::dynamic_pointer_cast<Task>(node.lock());
         auto from_device = device_graph_->GetDevice(from->allocated_to);
         auto task_record = from_device->GetRecordOfTask(from->node_id);
+        // max(parents' finish_time + comm_time)
         prepared_time = std::max(prepared_time, task_record.time_slice.start_time + task_record.time_slice.exec_time
-            + from_device->GetCommTimeWithDevice(device, from->output_size));   // max(parents' finish_time + comm_time)
+            + device_graph_->GetCommTimeBetweenDevices(from_device->node_id, device->node_id, from->output_size));
     }
 
     return std::max(prepared_time, EarliestAvailTimeOnDevice(device))

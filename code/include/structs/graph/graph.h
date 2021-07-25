@@ -48,15 +48,6 @@ public:
         return id;
     }
 
-    virtual inline void AddNode(NodePtr &&node) {
-        all_nodes_.push_back(std::move(node));
-    }
-
-    virtual inline void AddEdge(NodeID from, NodeID to) {
-        all_nodes_[from]->addOutNode(all_nodes_[to]);
-        all_nodes_[to]->addInNode(all_nodes_[from]);
-    }
-
     inline NodeID GetNodeNum() const {
         return all_nodes_.size();
     }

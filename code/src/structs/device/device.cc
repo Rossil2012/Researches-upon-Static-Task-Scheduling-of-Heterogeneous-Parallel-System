@@ -4,6 +4,8 @@
 
 DeviceGraphPtr DeviceGraph::Clone() const {
     auto new_graph = std::make_shared<DeviceGraph>();
+    new_graph->node_num_ = this->node_num_;
+    new_graph->bandwidth_map_ = this->bandwidth_map_;
     new_graph->all_nodes_.reserve(all_nodes_.size());
 
     for (const auto &node : all_nodes_) {
@@ -31,15 +33,20 @@ void DeviceGraph::Traverse(const std::function<void(DevicePtr &)> &callback) {
     }
 }
 
-LogicalTime Device::GetCommTimeWithDevice(const DevicePtr &device, size_t data_size) const {
-    return 0;
+LogicalTime DeviceGraph::GetCommTimeBetweenDevices(DeviceID from, DeviceID to, size_t data_size) const {
+    constexpr static double const_contention = 0.01; // 10ms contention
+    constexpr static LogicalTime LT_per_second = 1000000000 * LogicalTimeGain;
+    auto bandwidth = double(bandwidth_map_->at(from * node_num_ + to));
+    auto ret = bandwidth == 0 ? 0 :
+            LogicalTime((double(data_size) / (bandwidth * 1000) + const_contention) * LT_per_second);
+    return ret;
 }
 
 LogicalTime CPU::GetCompTimeOnTask(const TaskPtr &task) const {
     LogicalTime comp_time = 0;
     for (const auto &tasklet : task->task_flow) {
         comp_time += (tasklet.data_size / process_cap[tasklet.data_type] / num_core_ + 1) *
-                LogicalTime(ps_per_cycle_ * LogicalTimeGain);
+                LogicalTime(ns_per_cycle_ * LogicalTimeGain);
     }
     return comp_time;
 }
@@ -54,7 +61,7 @@ LogicalTime GPU::GetCompTimeOnTask(const TaskPtr &task) const {
     LogicalTime comp_time = 0;
     for (const auto &tasklet : task->task_flow) {
         comp_time += (tasklet.data_size / num_cuda_ + 1) *
-                     LogicalTime(ps_per_cycle_ * LogicalTimeGain);
+                     LogicalTime(ns_per_cycle_ * LogicalTimeGain);
     }
     return comp_time;
 }
