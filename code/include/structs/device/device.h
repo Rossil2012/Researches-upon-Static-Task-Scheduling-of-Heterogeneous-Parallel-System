@@ -35,10 +35,12 @@ struct taskRecord {
 class Device : public Node {
 public:
     explicit Device()
-        : avail_memory_(0) {}
+        : tot_memory_(0),
+          avail_memory_(0) {}
 
     explicit Device(size_t memory_constraint)
-        : avail_memory_(memory_constraint) {}
+        : tot_memory_(memory_constraint),
+          avail_memory_(memory_constraint) {}
 
     Device(const Device &ano) = default;
 
@@ -68,13 +70,15 @@ public:
     inline void ResetTemp() {
         partial_schedule_.clear();
         task_record_.clear();
+        avail_memory_ = tot_memory_;
     }
 
     virtual LogicalTime GetCompTimeOnTask(const TaskPtr &task) const = 0;
     virtual DevicePtr Clone() const = 0;
 
 protected:
-    size_t avail_memory_;   // TODO: bug when clone
+    size_t tot_memory_;
+    size_t avail_memory_;
     std::map<LogicalTime, LogicalTime> partial_schedule_;   // start_time -> exec_time
     std::unordered_map<TaskID, taskRecord> task_record_;     // TaskID -> start_time + exec_time
 };
