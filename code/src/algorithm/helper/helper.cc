@@ -66,7 +66,7 @@ std::vector<TaskPtr> CreateNodeListFromPriority(const TaskGraphPtr &task_graph, 
 }
 
 LogicalTime EarliestAvailTimeOnDevice(const DevicePtr &device) {
-    auto schedule = device->CurrentSchedule();
+    auto &schedule = device->CurrentSchedule();
     auto latest_task = schedule.rbegin();
     return schedule.empty() ? 0 : latest_task->first + latest_task->second;
 }

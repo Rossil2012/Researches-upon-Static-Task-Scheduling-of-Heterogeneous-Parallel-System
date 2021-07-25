@@ -14,7 +14,7 @@ using TaskPtr = std::shared_ptr<Task>;
 using TaskWeakPtr = std::weak_ptr<Task>;
 
 enum DataType {
-    INT32, INT64, FLOAT, DOUBLE
+    INT32 = 0, INT64, FLOAT, DOUBLE
 };
 
 struct Tasklet {

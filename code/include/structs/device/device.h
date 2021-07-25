@@ -96,25 +96,25 @@ public:
           num_core_(num_core) {
         switch (support_isa) {
             case None:
-                process_cap = {{INT32, 1}, {INT64, 1}, {FLOAT, 1}, {DOUBLE, 1},};
+                process_cap = {1, 1, 1, 1};
                 break;
             case MMX:
-                process_cap = {{INT32, 2}, {INT64, 1}, {FLOAT, 1}, {DOUBLE, 1},};
+                process_cap = {2, 1, 1, 1};
                 break;
             case SSE1:
-                process_cap = {{INT32, 4}, {INT64, 1}, {FLOAT, 4}, {DOUBLE, 1},};
+                process_cap = {4, 1, 4, 1};
                 break;
             case SSE2:
-                process_cap = {{INT32, 4}, {INT64, 2}, {FLOAT, 4}, {DOUBLE, 2},};
+                process_cap = {4, 2, 4, 2};
                 break;
             case AVX2:
-                process_cap = {{INT32, 8}, {INT64, 4}, {FLOAT, 8}, {DOUBLE, 4},};
+                process_cap = {8, 4, 8, 4};
                 break;
             case AVX512:
-                process_cap = {{INT32, 16}, {INT64, 8}, {FLOAT, 16}, {DOUBLE, 8},};
+                process_cap = {16, 8, 16, 8};
                 break;
             default:
-                process_cap = {{INT32, 1}, {INT64, 1}, {FLOAT, 1}, {DOUBLE, 1},};
+                process_cap = {1, 1, 1, 1};
                 break;
         }
     }
@@ -128,7 +128,7 @@ private:
     double ps_per_cycle_;
     size_t num_core_;
 
-    std::map<DataType, size_t> process_cap;
+    std::vector<size_t> process_cap;    // INT32, INT64, FLOAT, DOUBLE
 };
 
 class GPU : public Device {

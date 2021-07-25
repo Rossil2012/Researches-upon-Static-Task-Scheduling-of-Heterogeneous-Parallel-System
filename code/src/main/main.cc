@@ -38,7 +38,7 @@ void testCreateNodeListFromPriority() {
 }
 
 std::vector<Tasklet> GenRandomTaskFlow() {
-    auto serial_num = RandomWithRange<size_t>(1, 1000);
+    auto serial_num = RandomWithRange<size_t>(1, 100);
 
     std::vector<Tasklet> ret;
     ret.reserve(serial_num);
@@ -52,7 +52,7 @@ std::vector<Tasklet> GenRandomTaskFlow() {
 }
 
 void testGA() {
-    const TaskID task_num = 1000;
+    const TaskID task_num = 10000;
     const double task_edge_prob = 0.01;
     const DeviceID device_num = 5;
 

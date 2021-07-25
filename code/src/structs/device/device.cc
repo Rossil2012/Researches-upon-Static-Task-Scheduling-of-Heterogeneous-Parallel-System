@@ -34,7 +34,7 @@ LogicalTime Device::GetCommTimeWithDevice(const DevicePtr &device, size_t data_s
 LogicalTime CPU::GetCompTimeOnTask(const TaskPtr &task) const {
     LogicalTime comp_time = 0;
     for (const auto &tasklet : task->task_flow) {
-        comp_time += (tasklet.data_size / process_cap.at(tasklet.data_type) / num_core_ + 1) *
+        comp_time += (tasklet.data_size / process_cap[tasklet.data_type] / num_core_ + 1) *
                 LogicalTime(ps_per_cycle_ * LogicalTimeGain);
     }
     return comp_time;
