@@ -7,7 +7,7 @@
 using ChromosomeNL = Chromosome<size_t>;
 
 // default parameters
-constexpr static uint32_t d_pop_size = 10;
+constexpr static uint32_t d_pop_size = 100;
 constexpr static double d_mutate_rate = 0.01;
 constexpr static double d_crossover_portion = 0.25;
 constexpr static double d_mutate_portion = 0.25;
