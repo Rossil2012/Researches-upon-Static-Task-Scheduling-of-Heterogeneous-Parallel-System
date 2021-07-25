@@ -15,6 +15,10 @@ DeviceGraphPtr DeviceGraph::Clone() const {
         for (auto &old_out : new_node->out_nodes) {
             old_out = NodeWeakPtr(new_graph->all_nodes_[old_out.lock()->node_id]);  // point to new_nodes
         }
+
+        for (auto &old_in : new_node->in_nodes) {
+            old_in = NodeWeakPtr(new_graph->all_nodes_[old_in.lock()->node_id]);  // point to new_nodes
+        }
     }
 
     return new_graph;

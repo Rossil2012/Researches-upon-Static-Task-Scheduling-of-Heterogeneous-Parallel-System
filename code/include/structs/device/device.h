@@ -74,7 +74,7 @@ public:
     virtual DevicePtr Clone() const = 0;
 
 protected:
-    size_t avail_memory_;
+    size_t avail_memory_;   // TODO: bug when clone
     std::map<LogicalTime, LogicalTime> partial_schedule_;   // start_time -> exec_time
     std::unordered_map<TaskID, taskRecord> task_record_;     // TaskID -> start_time + exec_time
 };

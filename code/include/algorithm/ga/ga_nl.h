@@ -25,7 +25,7 @@ public:
               mutate_portion_(mutate_portion),
               tot_fitness_(0) {}
 
-    LogicalTime GetExecTime() override;
+    ScheduleResult GetResult() override;
 
 protected:
     double mutate_rate_;
@@ -38,12 +38,11 @@ protected:
     void calculateFitness() override;
     void reproduce() override;
     void select() override;
-    ScheduleResult getResult() override;
 
     std::vector<ChromosomeNL> crossover();
     std::vector<ChromosomeNL> mutate();
 
-    ScheduleResult GetExecResultWithNP(const TaskGraphPtr &task_graph,
+    static ScheduleResult GetExecResultWithNP(const TaskGraphPtr &task_graph,
                                        const DeviceGraphPtr &device_graph,
                                        const std::vector<size_t> &priority);
 };

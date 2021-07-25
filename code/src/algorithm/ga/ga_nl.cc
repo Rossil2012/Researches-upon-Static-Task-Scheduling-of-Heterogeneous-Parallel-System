@@ -16,8 +16,15 @@ void GA_NL::initPopulation() {
 void GA_NL::calculateFitness() {
     tot_fitness_ = 0;
     LogicalTime max_fitness = 0;
+    std::vector<std::future<ScheduleResult>> async_res; async_res.reserve(pop_size_);
     for (auto &entity : population_) {
-        entity.fitness = GetExecResultWithNP(task_graph_, device_graph_, entity.code).exec_time;
+        async_res.push_back(std::async(std::launch::async,
+                                       GA_NL::GetExecResultWithNP, task_graph_, device_graph_, entity.code));
+    }
+
+    for (size_t i = 0; i < population_.size(); i++) {
+        auto &entity = population_[i];
+        entity.fitness = async_res[i].get().exec_time;
         max_fitness = std::max(max_fitness, entity.fitness);
     }
 
@@ -58,7 +65,7 @@ void GA_NL::select() {
     tot_fitness_ = new_tot_fitness_;
 }
 
-ScheduleResult GA_NL::getResult() {
+ScheduleResult GA_NL::GetResult() {
     ChromosomeNL &elite_entity = *std::max_element(population_.begin(), population_.end(),
         [](const ChromosomeNL &a, const ChromosomeNL &b) { return a.fitness < b.fitness; });
     return GetExecResultWithNP(task_graph_, device_graph_, elite_entity.code);
@@ -120,20 +127,13 @@ std::vector<ChromosomeNL> GA_NL::mutate() {
     return std::move(mut_children);
 }
 
-LogicalTime GA_NL::GetExecTime() {
-    auto comp_func = [](const ChromosomeNL &a, const ChromosomeNL &b) { return a.fitness < b.fitness; };
-    ChromosomeNL &elite_entity = *std::max_element(population_.begin(), population_.end(), comp_func);
-    LS_NL ls_nl(task_graph_, device_graph_,
-        CreateNodeListFromPriority(task_graph_, elite_entity.code));
-    ls_nl.Schedule();
-    return ls_nl.GetExecTime();
-}
-
 ScheduleResult GA_NL::GetExecResultWithNP(const TaskGraphPtr &task_graph,
                                    const DeviceGraphPtr &device_graph,
                                    const std::vector<size_t> &priority) {
 
-    LS_NL ls_nl(task_graph_->Clone(), device_graph_->Clone(), CreateNodeListFromPriority(task_graph_, priority));
+    auto task_graph_clone = task_graph->Clone();
+    auto nl = CreateNodeListFromPriority(task_graph_clone, priority);
+    LS_NL ls_nl(std::move(task_graph_clone), device_graph->Clone(), std::move(nl));
     ls_nl.Schedule();
     return {
             .allocation = ls_nl.GetProcessorAllocation(),

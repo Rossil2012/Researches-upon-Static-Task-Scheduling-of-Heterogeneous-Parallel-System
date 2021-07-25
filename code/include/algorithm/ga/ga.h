@@ -57,7 +57,7 @@ public:
     ScheduleResult ScheduleWithMaxEpoch(uint32_t max_epoch = d_max_epoch);
     ScheduleResult ScheduleWithMaxDuration(clock_t max_duration = d_max_duration);
 
-    virtual LogicalTime GetExecTime() = 0;
+    virtual ScheduleResult GetResult() = 0;
 
 protected:
     size_t pop_size_;
@@ -72,7 +72,6 @@ protected:
     virtual void calculateFitness() = 0;
     virtual void reproduce() = 0;
     virtual void select() = 0;
-    virtual ScheduleResult getResult() = 0;
 };
 
 #endif //SCHEDULE_ALGORITHM_GA_H_

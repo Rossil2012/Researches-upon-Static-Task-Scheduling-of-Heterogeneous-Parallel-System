@@ -33,7 +33,7 @@ private:
     void calculateFitness() override;
     void reproduce() override;
     void select() override;
-    ScheduleResult getResult() override;
+    ScheduleResult GetResult() override;
 
     std::vector<ChromosomePA> crossover();
     std::vector<ChromosomePA> mutate();

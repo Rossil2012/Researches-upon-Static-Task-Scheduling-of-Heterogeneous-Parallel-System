@@ -2,8 +2,9 @@
 #define SCHEDULE_INCLUDE_GLOBAL_H_
 
 #include <cstdint>
-#include <functional>
 #include <ctime>
+#include <functional>
+#include <future>
 #include <memory>
 
 #endif //SCHEDULE_INCLUDE_GLOBAL_H_

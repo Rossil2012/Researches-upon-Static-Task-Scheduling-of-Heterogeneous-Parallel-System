@@ -8,11 +8,11 @@ ScheduleResult GA::ScheduleWithMaxEpoch(uint32_t max_epoch) {
 
     while (max_epoch-- > 0) {
         iterOnce();
-        std::cout << max_epoch << ": " << getResult().exec_time << "\n";
+        std::cout << max_epoch << ": " << GetResult().exec_time << "\n";
     }
 
 
-    return getResult();
+    return GetResult();
 }
 
 ScheduleResult GA::ScheduleWithMaxDuration(clock_t max_duration) {
@@ -25,7 +25,7 @@ ScheduleResult GA::ScheduleWithMaxDuration(clock_t max_duration) {
         iterOnce();
     }
 
-    return getResult();
+    return GetResult();
 }
 
 void GA::iterOnce() {

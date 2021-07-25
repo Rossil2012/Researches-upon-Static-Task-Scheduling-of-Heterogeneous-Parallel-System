@@ -84,7 +84,7 @@ void testGA() {
 
     ga_nl.ScheduleWithMaxEpoch();
 
-    std::cout << ga_nl.GetExecTime();
+    std::cout << ga_nl.GetResult().exec_time;
 }
 
 int main() {

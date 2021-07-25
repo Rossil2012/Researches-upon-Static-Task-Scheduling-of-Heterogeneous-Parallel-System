@@ -45,6 +45,7 @@ public:
         in_graph = true;
         in_degree = in_nodes.size();
         out_degree = out_nodes.size();
+        allocated_to = -1;
     }
 
     TaskPtr Clone() const;

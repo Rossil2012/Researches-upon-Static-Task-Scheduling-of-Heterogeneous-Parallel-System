@@ -65,7 +65,7 @@ void GA_PA::select() {
     population_ = std::move(new_population);
 }
 
-ScheduleResult GA_PA::getResult() {
+ScheduleResult GA_PA::GetResult() {
     ChromosomePA &elite_entity = *std::max_element(population_.begin(), population_.end(),
                                                            [](const ChromosomePA &a, const ChromosomePA &b) { return a.fitness < b.fitness; });
     return GetExecResultWithPA(task_graph_, device_graph_, elite_entity.code);
