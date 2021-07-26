@@ -1,8 +1,8 @@
 #include "ls/ls.h"
 
 void LS::Schedule() {
-    genNodeList();
-    genProcessorAllocation();
+    phaseNodeList();
+    phaseProcessorAllocation();
 }
 
 LogicalTime LS::GetExecTime() {
@@ -33,7 +33,7 @@ LogicalTime LS::earliestTimeOnDevice(const TaskPtr &task, const DevicePtr &devic
 }
 
 // minimal finish time
-void LS::genProcessorAllocation() {
+void LS::phaseProcessorAllocation() {
     processor_allocation_.resize(node_list_.size());
     for (auto &task : node_list_) {
         LogicalTime min_finish_time = -1;

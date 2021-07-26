@@ -30,8 +30,8 @@ protected:
     TaskGraphPtr task_graph_;
     DeviceGraphPtr device_graph_;
 
-    virtual void genNodeList() = 0;
-    virtual void genProcessorAllocation();
+    virtual void phaseNodeList() {}
+    virtual void phaseProcessorAllocation();
 
     LogicalTime earliestTimeOnDevice(const TaskPtr &task, const DevicePtr &device, bool isFinish);
 };

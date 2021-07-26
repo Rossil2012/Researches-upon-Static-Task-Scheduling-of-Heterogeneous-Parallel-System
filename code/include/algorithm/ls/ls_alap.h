@@ -10,7 +10,7 @@ public:
             : LS(std::move(task_graph), std::move(device_graph)) {}
 
 protected:
-    void genNodeList() override;
+    void phaseNodeList() override;
 };
 
 #endif //SCHEDULE_ALGORITHM_LS_ALAP_H_
