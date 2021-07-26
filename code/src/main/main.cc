@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "global.h"
+
 #include "graph/graph.h"
 #include "ga/ga_nl.h"
 #include "ls/ls_asap.h"

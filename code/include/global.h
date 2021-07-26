@@ -10,4 +10,6 @@
 
 extern std::random_device g_random_device;
 
+void Init();
+
 #endif //SCHEDULE_INCLUDE_GLOBAL_H_
