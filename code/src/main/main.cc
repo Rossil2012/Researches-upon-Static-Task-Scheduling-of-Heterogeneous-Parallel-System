@@ -7,6 +7,7 @@
 #include "ls/ls_asap.h"
 #include "ls/ls_alap.h"
 #include "naive/hashing.h"
+#include "naive/cpop.h"
 
 void debugPrint(const std::vector<int> &vec) {
     for (const auto &item : vec) {
@@ -65,9 +66,13 @@ TaskGraphPtr makeTaskGraph() {
 
     if (f) { return task_graph; } else { f = true; }
 
-    for (int i = 0; i < task_num; i++) {
+    task_graph->NewTask(0, std::vector<Tasklet>()); // manual source node
+
+    for (int i = 1; i < task_num - 1; i++) {
         task_graph->NewTask(RandomWithRange<size_t>(10, 1000), GenRandomTaskFlow());
     }
+
+    task_graph->NewTask(0, std::vector<Tasklet>()); // manual sink node
 
     auto task_shuffled = GenIncPriorVector<TaskID>(task_num);
     ShuffleVector(task_shuffled);
@@ -77,6 +82,16 @@ TaskGraphPtr makeTaskGraph() {
             if (RandomWithProbability(task_edge_prob)) {
                 task_graph->AddEdge(from_, to_);
             }
+        }
+    }
+
+    for (int i = 1; i < task_num - 1; i++) {
+        auto cur = task_graph->GetTask(i);
+        if (cur->in_nodes.empty()) {
+            task_graph->AddEdge(0, i);
+        }
+        if (cur->out_nodes.empty()) {
+            task_graph->AddEdge(i, task_num - 1);
         }
     }
 
@@ -161,18 +176,29 @@ void testHashing() {
     std::cout << hashing.GetExecTime() << "\n";
 }
 
+void testCPOP() {
+    auto task_graph = makeTaskGraph();
+    auto device_graph = makeDeviceGraph();
+
+    auto cpop = CPOP(task_graph->Clone(), device_graph->Clone());
+    cpop.Schedule();
+
+    std::cout << cpop.GetExecTime() << "\n";
+}
+
 int main() {
 //    testCreateNodeListFromPriority();
     Init();
-
-    std::cout << "Hashing:\n";
-    testHashing();
-    std::cout << "LS_ASAP:\n";
-    testLSASAP();
-    std::cout << "LS_ALAP:\n";
-    testLSALAP();
-    std::cout << "GA_NL:\n";
-    testGA();
+    std::cout << "CPOP:\n";
+    testCPOP();
+//    std::cout << "Hashing:\n";
+//    testHashing();
+//    std::cout << "LS_ASAP:\n";
+//    testLSASAP();
+//    std::cout << "LS_ALAP:\n";
+//    testLSALAP();
+//    std::cout << "GA_NL:\n";
+//    testGA();
 
     return 0;
 }

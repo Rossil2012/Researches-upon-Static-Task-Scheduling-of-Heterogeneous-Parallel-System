@@ -3,6 +3,7 @@
 
 #include "ls.h"
 
+/* variant of HEFT */
 /* List Schedule with Top Level as Node Priority, a.k.a. As Soon As Possible */
 class LS_ASAP : public LS {
 public:

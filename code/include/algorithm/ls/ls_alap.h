@@ -3,6 +3,7 @@
 
 #include "ls.h"
 
+/* original HEFT introduced in the paper */
 /* List Schedule with Bottom Level as Node Priority, a.k.a. As Late As Possible */
 class LS_ALAP : public LS {
 public:
