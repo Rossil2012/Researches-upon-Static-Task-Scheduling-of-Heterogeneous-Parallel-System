@@ -36,7 +36,7 @@ public:
     }
 
 
-    static std::function<LogicalTime(Chromosome<T>)> get_weight;
+    static std::function<LogicalTime(Chromosome<T>&)> get_weight;
 
     std::vector<T> code;
     LogicalTime fitness;

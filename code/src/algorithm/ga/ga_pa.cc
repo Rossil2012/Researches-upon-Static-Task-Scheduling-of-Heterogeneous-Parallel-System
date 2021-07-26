@@ -1,7 +1,7 @@
 #include "ga/ga_pa.h"
 
 template <>
-std::function<LogicalTime(ChromosomePA)> ChromosomePA::get_weight =
+std::function<LogicalTime(ChromosomePA&)> ChromosomePA::get_weight =
         [](const ChromosomePA &entity) { return entity.fitness; };
 
 // initialize randomly

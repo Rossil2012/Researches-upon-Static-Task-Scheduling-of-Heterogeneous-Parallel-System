@@ -3,7 +3,7 @@
 #include <unordered_set>
 
 template <>
-std::function<LogicalTime(ChromosomeNL)> ChromosomeNL::get_weight =
+std::function<LogicalTime(ChromosomeNL&)> ChromosomeNL::get_weight =
         [](const ChromosomeNL &entity) { return entity.fitness; };
 
 void GA_NL::initPopulation() {

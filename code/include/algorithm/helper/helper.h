@@ -57,7 +57,7 @@ void AppendVectorWithMove(std::vector<T> &vec, std::vector<T> &&to_append) {
 }
 
 template <typename F, typename T>
-T &RouletteWheel(std::vector<T> &vec, F tot_weight, const std::function<F(T)> &get_weight) {
+T &RouletteWheel(std::vector<T> &vec, F tot_weight, const std::function<F(T&)> &get_weight) {
     F rand_low = 0, rand_high = tot_weight;
 
     F rand_weight = RandomWithRange(rand_low, rand_high);
