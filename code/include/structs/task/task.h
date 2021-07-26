@@ -65,7 +65,7 @@ protected:
     inline static size_t getParamSizeFromTaskFlow(const std::vector<Tasklet> &flow) {
         size_t ret = 0;
         for (const auto &tasklet : flow) {
-            ret += (tasklet.data_type == INT32 || tasklet.data_type == FLOAT ? 4 : 8);
+            ret += (tasklet.data_type == INT32 || tasklet.data_type == FLOAT ? 4 : 8) * tasklet.data_size;
         }
         return ret;
     }
