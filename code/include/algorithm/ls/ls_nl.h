@@ -11,8 +11,7 @@ public:
     }
 
 protected:
-    void genNodeList() override;
-    void genProcessorAllocation() override;
+    void genNodeList() override {};
 };
 
 #endif //SCHEDULE_ALGORITHM_LS_NL_H_

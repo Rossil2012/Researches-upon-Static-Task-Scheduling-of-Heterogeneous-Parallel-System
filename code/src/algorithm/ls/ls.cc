@@ -31,3 +31,33 @@ LogicalTime LS::earliestTimeOnDevice(const TaskPtr &task, const DevicePtr &devic
     return std::max(prepared_time, EarliestAvailTimeOnDevice(device))
         + (isFinish ? device->GetCompTimeOnTask(task) : 0);
 }
+
+// minimal finish time
+void LS::genProcessorAllocation() {
+    processor_allocation_.resize(node_list_.size());
+    for (auto &task : node_list_) {
+        LogicalTime min_finish_time = -1;
+        DeviceID min_device_ = processor_allocation_[0];
+
+        auto callback = [&](DevicePtr &device) {
+            if (task->MemorySize() <= device->AvailMemory()) {   // device has enough memory
+                LogicalTime finish_time = earliestTimeOnDevice(task, device, true);
+                if (finish_time < min_finish_time) {  // earliest finish time
+                    min_finish_time = finish_time;
+                    min_device_ = device->node_id;
+                }
+            }
+        };
+
+        device_graph_->Traverse(callback);
+
+        if (min_finish_time == -1) {
+            throw "Device: lack of memory";
+        }
+
+        auto min_device = device_graph_->GetDevice(min_device_);
+        LogicalTime exec_time = min_device->GetCompTimeOnTask(task);
+        min_device->AddTaskToSchedule(task, min_finish_time - exec_time, exec_time);
+        processor_allocation_[task->node_id] = min_device_;
+    }
+}

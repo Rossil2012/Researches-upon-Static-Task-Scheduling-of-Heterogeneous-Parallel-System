@@ -14,10 +14,8 @@ class LS {
 public:
     explicit LS(TaskGraphPtr &&task_graph, DeviceGraphPtr &&device_graph)
         : task_graph_(std::move(task_graph)),
-          device_graph_(std::move(device_graph)) {
-        node_list_.reserve(task_graph_->GetNodeNum());
-        processor_allocation_.reserve(task_graph_->GetNodeNum());
-    }
+          device_graph_(std::move(device_graph)) {}
+
     void Schedule();
     LogicalTime GetExecTime();
     inline TypeNL GetNodeList() {
@@ -33,7 +31,7 @@ protected:
     DeviceGraphPtr device_graph_;
 
     virtual void genNodeList() = 0;
-    virtual void genProcessorAllocation() = 0;
+    virtual void genProcessorAllocation();
 
     LogicalTime earliestTimeOnDevice(const TaskPtr &task, const DevicePtr &device, bool isFinish);
 };
