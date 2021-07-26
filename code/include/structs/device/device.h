@@ -99,22 +99,22 @@ public:
           num_core_(num_core) {
         switch (support_isa) {
             case None:
-                process_cap = {1, 1, 1, 1};
+                process_cap = {8, 8, 8, 8};
                 break;
             case MMX:
-                process_cap = {2, 1, 1, 1};
+                process_cap = {16, 8, 8, 8};
                 break;
             case SSE1:
-                process_cap = {4, 1, 4, 1};
+                process_cap = {32, 8, 32, 8};
                 break;
             case SSE2:
-                process_cap = {4, 2, 4, 2};
+                process_cap = {32, 16, 32, 16};
                 break;
             case AVX2:
-                process_cap = {8, 4, 8, 4};
+                process_cap = {64, 32, 64, 32};
                 break;
             case AVX512:
-                process_cap = {16, 8, 16, 8};
+                process_cap = {128, 64, 128, 64};
                 break;
             default:
                 process_cap = {1, 1, 1, 1};
