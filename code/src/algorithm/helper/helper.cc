@@ -31,7 +31,7 @@ std::vector<size_t> ComputeBottomLevel(const TaskGraphPtr &task_graph) {
         bottom_level[cur->node_id] = max_bl + cur->param_size;
     };
 
-    task_graph->TraverseTopo(callback);
+    task_graph->TraverseInverseTopo(callback);
 
     return std::move(bottom_level);
 }
