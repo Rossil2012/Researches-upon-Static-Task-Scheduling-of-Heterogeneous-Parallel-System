@@ -1,5 +1,42 @@
 #include "helper/helper.h"
 
+std::vector<size_t> ComputeTopLevel(const TaskGraphPtr &task_graph) {
+    std::vector<size_t> top_level(task_graph->GetNodeNum(), 0);
+
+    auto callback = [&top_level](TaskPtr &cur) {
+        size_t max_tl = 0;
+        for (const auto &from_ : cur->in_nodes) {
+            auto from = std::dynamic_pointer_cast<Task>(from_.lock());
+            auto cur_tl = top_level[from->node_id] + from->param_size + from->output_size;
+            max_tl = std::max(max_tl, cur_tl);
+        }
+        top_level[cur->node_id] = max_tl;
+    };
+
+    task_graph->TraverseTopo(callback);
+
+    return std::move(top_level);
+}
+
+std::vector<size_t> ComputeBottomLevel(const TaskGraphPtr &task_graph) {
+    std::vector<size_t> bottom_level(task_graph->GetNodeNum(), 0);
+
+    auto callback = [&bottom_level](TaskPtr &cur) {
+        size_t max_bl = 0;
+        for (const auto &to_ : cur->out_nodes) {
+            auto to = std::dynamic_pointer_cast<Task>(to_.lock());
+            auto cur_bl = bottom_level[to->node_id] + cur->output_size;
+            max_bl = std::max(max_bl, cur_bl);
+        }
+        bottom_level[cur->node_id] = max_bl + cur->param_size;
+    };
+
+    task_graph->TraverseTopo(callback);
+
+    return std::move(bottom_level);
+}
+
+
 
 static LogicalTime CalculateMaxExecTimeFromTask(const TaskPtr &from,
                                                 const DeviceGraphPtr &device_graph,

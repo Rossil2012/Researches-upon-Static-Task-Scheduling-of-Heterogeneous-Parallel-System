@@ -44,11 +44,14 @@ public:
 
     void TraverseTopo(const std::function<void(TaskPtr &)> &callback);
 
+    void TraverseInverseTopo(const std::function<void(TaskPtr &)> &callback);
+
     void TraversePriorTopo(const std::function<void(TaskPtr &)> &callback,
                            const std::vector<size_t> &priority);
 
 protected:
     std::vector<TaskPtr> getAllSources();
+    std::vector<TaskPtr> getAllSinks();
 };
 
 #endif //SCHEDULE_STRUCTS_TASK_GRAPH_H_

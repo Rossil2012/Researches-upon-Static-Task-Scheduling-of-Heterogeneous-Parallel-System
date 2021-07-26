@@ -25,6 +25,29 @@ void TaskGraph::TraverseTopo(const std::function<void(TaskPtr &)> &callback) {
     }
 }
 
+
+void TaskGraph::TraverseInverseTopo(const std::function<void(TaskPtr &)> &callback) {
+    auto all_sinks = getAllSinks();
+    std::queue<TaskPtr> to_traverse;
+
+    for (auto &sink : all_sinks) {
+        to_traverse.push(std::move(sink));
+    }
+
+    while (!to_traverse.empty()) {
+        auto cur_node = to_traverse.front();
+        to_traverse.pop();
+
+        callback(cur_node);
+        for (auto &from_ : cur_node->in_nodes) {
+            auto from = std::dynamic_pointer_cast<Task>(from_.lock());
+            if (--from->out_degree == 0) {
+                to_traverse.push(std::move(from));
+            }
+        }
+    }
+}
+
 class topoPriorityQueue {
 public:
     explicit topoPriorityQueue(std::vector<TaskPtr> &&all_sources, const std::vector<size_t> &priority)
@@ -82,6 +105,20 @@ std::vector<TaskPtr> TaskGraph::getAllSources() {
         auto task = std::dynamic_pointer_cast<Task>(node);
         task->ResetTemp();
         if (node->in_nodes.empty()) {
+            ret.push_back(std::move(task));
+        }
+    }
+
+    return std::move(ret);
+}
+
+std::vector<TaskPtr> TaskGraph::getAllSinks() {
+    std::vector<TaskPtr> ret;
+
+    for (auto &node : all_nodes_) {
+        auto task = std::dynamic_pointer_cast<Task>(node);
+        task->ResetTemp();
+        if (node->out_nodes.empty()) {
             ret.push_back(std::move(task));
         }
     }

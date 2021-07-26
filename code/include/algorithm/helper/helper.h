@@ -11,7 +11,6 @@
 #include "task/task.h"
 #include "task/task_graph.h"
 
-extern std::random_device g_random_device;
 
 struct ScheduleResult {
     std::vector<DeviceID> allocation;
@@ -21,6 +20,9 @@ struct ScheduleResult {
 ScheduleResult GetExecResultWithPA(const TaskGraphPtr &task_graph,
                                    const DeviceGraphPtr &device_graph,
                                    const std::vector<DeviceID> &allocation);
+
+std::vector<size_t> ComputeTopLevel(const TaskGraphPtr &task_graph);
+std::vector<size_t> ComputeBottomLevel(const TaskGraphPtr &task_graph);
 
 bool RandomWithProbability(double prob);
 

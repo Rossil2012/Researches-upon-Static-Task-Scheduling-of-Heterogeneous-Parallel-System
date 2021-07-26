@@ -2,6 +2,8 @@
 
 #include "graph/graph.h"
 #include "ga/ga_nl.h"
+#include "ls/ls_asap.h"
+#include "ls/ls_alap.h"
 
 void debugPrint(const std::vector<int> &vec) {
     for (const auto &item : vec) {
@@ -51,13 +53,12 @@ std::vector<Tasklet> GenRandomTaskFlow() {
     return std::move(ret);
 }
 
-void testGA() {
+TaskGraphPtr makeTaskGraph() {
     const TaskID task_num = 3000;
     const double task_edge_prob = 0.01;
-    const DeviceID device_num = 5;
 
     auto task_graph = std::make_shared<TaskGraph>();
-    auto device_graph = std::make_shared<DeviceGraph>();
+
     for (int i = 0; i < task_num; i++) {
         task_graph->NewTask(RandomWithRange<size_t>(10, 1000), GenRandomTaskFlow());
     }
@@ -73,11 +74,19 @@ void testGA() {
         }
     }
 
-    device_graph->NewCPU(CPU::AVX512, 200 << 20, 5.0, 10);
-    device_graph->NewCPU(CPU::SSE2, 20 << 20, 3.8, 4);
-    device_graph->NewCPU(CPU::None, 100 << 20, 2.3, 2);
-    device_graph->NewGPU(200 << 20, 1.3, 2000);
-    device_graph->NewGPU(20 << 20, 1.8, 4000);
+    return std::move(task_graph);
+}
+
+DeviceGraphPtr makeDeviceGraph() {
+    const DeviceID device_num = 5;
+
+    auto device_graph = std::make_shared<DeviceGraph>();
+
+    device_graph->NewCPU(CPU::AVX512, size_t(4) << 30, 5.0, 10);
+    device_graph->NewCPU(CPU::SSE2, size_t(500) << 20, 3.8, 4);
+    device_graph->NewCPU(CPU::None, size_t(100) << 20, 2.3, 2);
+    device_graph->NewGPU(size_t(4) << 30, 1.3, 2000);
+    device_graph->NewGPU(size_t(4) << 30, 1.8, 4000);
 
     device_graph->NewNodeFinished();
 
@@ -87,16 +96,61 @@ void testGA() {
         }
     }
 
+    return std::move(device_graph);
+}
 
-    auto ga_nl = GA_NL(task_graph, device_graph);
+void testGA() {
+    auto task_graph = makeTaskGraph();
+    auto device_graph = makeDeviceGraph();
 
-    ga_nl.ScheduleWithMaxEpoch();
+    auto ga_nl = GA_NL(task_graph, device_graph, 10);
+
+    ga_nl.ScheduleWithMaxEpoch(100);
 
     std::cout << ga_nl.GetResult().exec_time;
 }
 
+void testLSASAP() {
+    auto task_graph = makeTaskGraph();
+    auto device_graph = makeDeviceGraph();
+
+    auto ls_asap = LS_ASAP(task_graph->Clone(), device_graph->Clone());
+
+    ls_asap.Schedule();
+
+    std::cout << ls_asap.GetExecTime() << "\n";
+
+//    for (const auto &allocated_to : ls_asap.GetProcessorAllocation()) {
+//        std::cout << allocated_to << " ";
+//    }
+//    std::cout << "\n";
+//
+//    for (const auto &node : ls_asap.GetNodeList()) {
+//        std::cout << node->node_id << " ";
+//    }
+//    std::cout << "\n";
+}
+
+void testLSALAP() {
+    auto task_graph = makeTaskGraph();
+    auto device_graph = makeDeviceGraph();
+
+    auto ls_alap = LS_ALAP(task_graph->Clone(), device_graph->Clone());
+
+    ls_alap.Schedule();
+
+    std::cout << ls_alap.GetExecTime() << "\n";
+}
+
 int main() {
 //    testCreateNodeListFromPriority();
+    Init();
+
+    std::cout << "LS_ASAP:\n";
+    testLSASAP();
+    std::cout << "LS_ALAP:\n";
+    testLSALAP();
+    std::cout << "GA_NL:\n";
     testGA();
 
     return 0;
