@@ -9,9 +9,6 @@ public:
         : LS(std::move(task_graph), std::move(device_graph)) {
         node_list_ = std::move(node_list);
     }
-
-protected:
-    void genNodeList() override {};
 };
 
 #endif //SCHEDULE_ALGORITHM_LS_NL_H_

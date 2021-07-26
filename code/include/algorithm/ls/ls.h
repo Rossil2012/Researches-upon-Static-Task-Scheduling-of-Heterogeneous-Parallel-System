@@ -16,7 +16,7 @@ public:
         : task_graph_(std::move(task_graph)),
           device_graph_(std::move(device_graph)) {}
 
-    void Schedule();
+    virtual void Schedule();
     LogicalTime GetExecTime();
     inline TypeNL GetNodeList() {
         return node_list_;
