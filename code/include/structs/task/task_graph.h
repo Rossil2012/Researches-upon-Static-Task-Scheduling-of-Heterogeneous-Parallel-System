@@ -25,9 +25,11 @@ public:
         return id;
     }
 
-    virtual inline void AddEdge(NodeID from, NodeID to) {
-        all_nodes_[from]->addOutNode(all_nodes_[to]);
-        all_nodes_[to]->addInNode(all_nodes_[from]);
+    inline void AddEdge(NodeID from_, NodeID to_) {
+        auto from = std::dynamic_pointer_cast<Task>(all_nodes_[from_]),
+             to = std::dynamic_pointer_cast<Task>(all_nodes_[to_]);
+        from->addOutNode(to); to->addInNode(from);
+        to->input_size += from->output_size;
     }
 
     inline TaskID NewTask(size_t output_size, std::vector<Tasklet> &&task_flow) {

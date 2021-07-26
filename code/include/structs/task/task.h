@@ -23,7 +23,6 @@ struct Tasklet {
 };
 
 class Task : public Node {
-    friend class TaskGraph;
 public:
     explicit Task()
         : param_size(0),
@@ -41,13 +40,6 @@ public:
         return input_size + param_size + output_size;
     }
 
-    inline void ResetTemp() {
-        in_graph = true;
-        in_degree = in_nodes.size();
-        out_degree = out_nodes.size();
-        allocated_to = -1;
-    }
-
     TaskPtr Clone() const;
 
     size_t input_size = 0;
@@ -56,10 +48,18 @@ public:
 
     std::vector<Tasklet> task_flow; // a task is abstracted as a serial of parallel sub_tasks
 
+    /* temporary variables for graph traverse */
     bool in_graph = false;
     size_t in_degree = 0, out_degree = 0;   // temporary variables
 
     DeviceID allocated_to = -1;
+
+    inline void ResetTemp() {
+        in_graph = true;
+        in_degree = in_nodes.size();
+        out_degree = out_nodes.size();
+        allocated_to = -1;
+    }
 
 protected:
     inline static size_t getParamSizeFromTaskFlow(const std::vector<Tasklet> &flow) {

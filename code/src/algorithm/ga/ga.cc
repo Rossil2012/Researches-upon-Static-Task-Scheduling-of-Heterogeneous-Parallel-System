@@ -6,6 +6,8 @@ ScheduleResult GA::ScheduleWithMaxEpoch(uint32_t max_epoch) {
     initPopulation();
     calculateFitness();
 
+    std::cout << max_epoch << ": " << GetResult().exec_time << "\n";
+
     while (max_epoch-- > 0) {
         iterOnce();
         std::cout << max_epoch << ": " << GetResult().exec_time << "\n";

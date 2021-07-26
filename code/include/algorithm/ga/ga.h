@@ -2,11 +2,7 @@
 #define SCHEDULE_ALGORITHM_GA_H_
 
 #include "global.h"
-//#include "device/device.h"
-//#include "device/device_graph.h"
 #include "helper/helper.h"
-//#include "task/task.h"
-//#include "task/task_graph.h"
 
 // when all candidate is lvalue, return reference; otherwise return value
 #define MAX(a, b, less) ((less)((a), (b)) ? (b) : (a))

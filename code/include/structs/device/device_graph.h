@@ -17,12 +17,11 @@ public:
 
     void Traverse(const std::function<void(DevicePtr &)> &callback);
 
-    inline void AddEdge(DeviceID a, NodeID b, size_t bandwidth) {
-        (*bandwidth_map_)[a * node_num_ + b] = (*bandwidth_map_)[b * node_num_ + a] = bandwidth;
-        all_nodes_[a]->addInNode(all_nodes_[b]);
-        all_nodes_[a]->addOutNode(all_nodes_[b]);
-        all_nodes_[b]->addInNode(all_nodes_[a]);
-        all_nodes_[b]->addOutNode(all_nodes_[a]);
+    inline void AddEdge(DeviceID a_, NodeID b_, size_t bandwidth) {
+        auto &a = all_nodes_[a_], &b = all_nodes_[b_];
+        (*bandwidth_map_)[a_ * node_num_ + b_] = (*bandwidth_map_)[b_ * node_num_ + a_] = bandwidth;
+        a->addInNode(b); a->addOutNode(b);
+        b->addInNode(a); b->addOutNode(a);
     }
 
     inline DeviceID NewCPU(CPU::SIMD support_isa, size_t memory_constraint, double frequency, size_t num_core) {
