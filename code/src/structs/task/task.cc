@@ -3,6 +3,13 @@
 
 #include <queue>
 
+void TaskGraph::Traverse(const std::function<void(TaskPtr &)> &callback) {
+    for (auto &node : all_nodes_) {
+        auto task = std::dynamic_pointer_cast<Task>(node);
+        callback(task);
+    }
+}
+
 void TaskGraph::TraverseTopo(const std::function<void(TaskPtr &)> &callback) {
     auto all_sources = getAllSources();
     std::queue<TaskPtr> to_traverse;

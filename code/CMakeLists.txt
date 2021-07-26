@@ -11,8 +11,10 @@ set(ALGORITHM_SRC
         src/algorithm/ga/ga_pa.cc
         src/algorithm/ls/ls.cc
         src/algorithm/ls/ls_nl.cc
+        src/algorithm/ls/ls_pa.cc
         src/algorithm/ls/ls_asap.cc
-        src/algorithm/ls/ls_alap.cc)
+        src/algorithm/ls/ls_alap.cc
+        src/algorithm/naive/hashing.cc)
 
 set(STRUCTS_SRC
         src/structs/graph/graph.cc

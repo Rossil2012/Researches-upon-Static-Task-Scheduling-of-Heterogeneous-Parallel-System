@@ -6,6 +6,7 @@
 #include "ga/ga_nl.h"
 #include "ls/ls_asap.h"
 #include "ls/ls_alap.h"
+#include "naive/hashing.h"
 
 void debugPrint(const std::vector<int> &vec) {
     for (const auto &item : vec) {
@@ -56,10 +57,13 @@ std::vector<Tasklet> GenRandomTaskFlow() {
 }
 
 TaskGraphPtr makeTaskGraph() {
-    const TaskID task_num = 3000;
+    const TaskID task_num = 10000;
     const double task_edge_prob = 0.01;
 
-    auto task_graph = std::make_shared<TaskGraph>();
+    static bool f = false;
+    static auto task_graph = std::make_shared<TaskGraph>();
+
+    if (f) { return task_graph; } else { f = true; }
 
     for (int i = 0; i < task_num; i++) {
         task_graph->NewTask(RandomWithRange<size_t>(10, 1000), GenRandomTaskFlow());
@@ -76,18 +80,21 @@ TaskGraphPtr makeTaskGraph() {
         }
     }
 
-    return std::move(task_graph);
+    return task_graph;
 }
 
 DeviceGraphPtr makeDeviceGraph() {
     const DeviceID device_num = 5;
 
-    auto device_graph = std::make_shared<DeviceGraph>();
+    static bool f = false;
+    static auto device_graph = std::make_shared<DeviceGraph>();
+
+    if (f) { return device_graph; } else { f = true; }
 
     device_graph->NewCPU(CPU::AVX512, size_t(4) << 30, 5.0, 10);
-    device_graph->NewCPU(CPU::SSE2, size_t(500) << 20, 3.8, 4);
+    device_graph->NewCPU(CPU::SSE2, size_t(16) << 30, 3.8, 4);
     device_graph->NewCPU(CPU::None, size_t(100) << 20, 2.3, 2);
-    device_graph->NewGPU(size_t(4) << 30, 1.3, 2000);
+    device_graph->NewGPU(size_t(8) << 30, 1.3, 2000);
     device_graph->NewGPU(size_t(4) << 30, 1.8, 4000);
 
     device_graph->NewNodeFinished();
@@ -98,14 +105,14 @@ DeviceGraphPtr makeDeviceGraph() {
         }
     }
 
-    return std::move(device_graph);
+    return device_graph;
 }
 
 void testGA() {
     auto task_graph = makeTaskGraph();
     auto device_graph = makeDeviceGraph();
 
-    auto ga_nl = GA_NL(task_graph, device_graph, 10);
+    auto ga_nl = GA_NL(task_graph->Clone(), device_graph->Clone(), 10);
 
     ga_nl.ScheduleWithMaxEpoch(100);
 
@@ -144,10 +151,22 @@ void testLSALAP() {
     std::cout << ls_alap.GetExecTime() << "\n";
 }
 
+void testHashing() {
+    auto task_graph = makeTaskGraph();
+    auto device_graph = makeDeviceGraph();
+
+    auto hashing = Hashing(task_graph->Clone(), device_graph->Clone());
+    hashing.Schedule();
+
+    std::cout << hashing.GetExecTime() << "\n";
+}
+
 int main() {
 //    testCreateNodeListFromPriority();
     Init();
 
+    std::cout << "Hashing:\n";
+    testHashing();
     std::cout << "LS_ASAP:\n";
     testLSASAP();
     std::cout << "LS_ALAP:\n";

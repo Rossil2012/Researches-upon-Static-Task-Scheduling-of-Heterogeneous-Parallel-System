@@ -42,6 +42,8 @@ public:
 
     TaskGraphPtr Clone();
 
+    void Traverse(const std::function<void(TaskPtr &)> &callback);
+
     void TraverseTopo(const std::function<void(TaskPtr &)> &callback);
 
     void TraverseInverseTopo(const std::function<void(TaskPtr &)> &callback);
