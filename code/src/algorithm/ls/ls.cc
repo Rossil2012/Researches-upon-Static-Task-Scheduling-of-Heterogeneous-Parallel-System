@@ -52,7 +52,7 @@ void LS::phaseProcessorAllocation() {
         device_graph_->Traverse(callback);
 
         if (min_finish_time == -1) {
-            throw "Device: lack of memory";
+            throw "LS: out of memory";
         }
 
         auto min_device = device_graph_->GetDevice(min_device_);

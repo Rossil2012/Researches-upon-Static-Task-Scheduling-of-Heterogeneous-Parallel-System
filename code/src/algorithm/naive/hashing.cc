@@ -38,7 +38,7 @@ TypePA Hashing::hashTaskToDevice() {
         }
 
         if (all_capable_device.empty()) {
-            throw "Device: lack of memory";
+            throw "Hashing: out of memory";
         }
 
         auto selected_device =
