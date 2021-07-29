@@ -2,32 +2,36 @@
 
 #include <iostream>
 
-ScheduleResult GA::ScheduleWithMaxEpoch(uint32_t max_epoch) {
+std::vector<LogicalTime> GA::ScheduleWithMaxEpoch(uint32_t max_epoch) {
     initPopulation();
     calculateFitness();
 
-    std::cout << max_epoch << ": " << GetResult().exec_time << "\n";
+    std::vector<LogicalTime> exec_results;
+    exec_results.push_back(GetResult().exec_time);
 
     while (max_epoch-- > 0) {
         iterOnce();
-        std::cout << max_epoch << ": " << GetResult().exec_time << "\n";
+        exec_results.push_back(GetResult().exec_time);
     }
 
-
-    return GetResult();
+    return std::move(exec_results);
 }
 
-ScheduleResult GA::ScheduleWithMaxDuration(clock_t max_duration) {
+std::vector<LogicalTime> GA::ScheduleWithMaxDuration(clock_t max_duration) {
     auto start = clock(), now = start;
 
     initPopulation();
     calculateFitness();
 
+    std::vector<LogicalTime> exec_results;
+    exec_results.push_back(GetResult().exec_time);
+
     for (; now - start < max_duration; now = clock()) {
         iterOnce();
+        exec_results.push_back(GetResult().exec_time);
     }
 
-    return GetResult();
+    return std::move(exec_results);
 }
 
 void GA::iterOnce() {

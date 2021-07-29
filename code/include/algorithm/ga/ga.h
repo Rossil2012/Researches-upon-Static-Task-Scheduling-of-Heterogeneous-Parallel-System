@@ -50,8 +50,8 @@ public:
           pop_size_(pop_size),
           reproduce_rate_(reproduce_rate) {}
 
-    ScheduleResult ScheduleWithMaxEpoch(uint32_t max_epoch = d_max_epoch);
-    ScheduleResult ScheduleWithMaxDuration(clock_t max_duration = d_max_duration);
+    std::vector<LogicalTime> ScheduleWithMaxEpoch(uint32_t max_epoch = d_max_epoch);
+    std::vector<LogicalTime> ScheduleWithMaxDuration(clock_t max_duration = d_max_duration);
 
     virtual ScheduleResult GetResult() = 0;
 
