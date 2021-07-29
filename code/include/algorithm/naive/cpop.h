@@ -4,6 +4,7 @@
 #include "device/device.h"
 #include "device/device_graph.h"
 #include "helper/helper.h"
+#include "ls/ls_pa.h"
 #include "task/task.h"
 #include "task/task_graph.h"
 
@@ -17,6 +18,9 @@ public:
     LogicalTime GetExecTime();
 
 protected:
+    LogicalTime getMinimumPathAllocation(const std::vector<DeviceID> &avail_devices, DeviceID from_device,
+                                         const std::vector<TaskPtr> &cp, size_t start, TypePA *processor_allocation);
+
     TaskGraphPtr task_graph_;
     DeviceGraphPtr device_graph_;
 };
