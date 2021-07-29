@@ -107,3 +107,20 @@ LogicalTime EarliestAvailTimeOnDevice(const DevicePtr &device) {
     auto latest_task = schedule.rbegin();
     return schedule.empty() ? 0 : latest_task->first + latest_task->second;
 }
+
+// field allocated_to should be set
+LogicalTime EarliestTimeOnDevice(const DeviceGraphPtr &device_graph, const TaskPtr &task,
+                                 const DevicePtr &device, bool isFinish) {
+    LogicalTime prepared_time = 0;  // time when all input data is ready
+    for (const auto &node : task->in_nodes) {
+        auto from = std::dynamic_pointer_cast<Task>(node.lock());
+        auto from_device = device_graph->GetDevice(from->allocated_to);
+        auto task_record = from_device->GetRecordOfTask(from->node_id);
+        // max(parents' finish_time + comm_time)
+        prepared_time = std::max(prepared_time, task_record.time_slice.start_time + task_record.time_slice.exec_time
+            + device_graph->GetCommTimeBetweenDevices(from_device->node_id, device->node_id, from->output_size));
+    }
+
+    return std::max(prepared_time, EarliestAvailTimeOnDevice(device))
+           + (isFinish ? device->GetCompTimeOnTask(task) : 0);
+}

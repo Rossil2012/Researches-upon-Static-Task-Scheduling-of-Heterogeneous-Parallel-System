@@ -74,6 +74,9 @@ T &RouletteWheel(std::vector<T> &vec, F tot_weight, const std::function<F(T&)> &
 
 LogicalTime EarliestAvailTimeOnDevice(const DevicePtr &device);
 
+LogicalTime EarliestTimeOnDevice(const DeviceGraphPtr &device_graph, const TaskPtr &task,
+                                 const DevicePtr &device, bool isFinish);
+
 template<typename T>
 std::vector<T> GenIncPriorVector(size_t n) {
     std::vector<T> vec; vec.reserve(n);

@@ -32,8 +32,6 @@ protected:
 
     virtual void phaseNodeList() {}
     virtual void phaseProcessorAllocation();
-
-    LogicalTime earliestTimeOnDevice(const TaskPtr &task, const DevicePtr &device, bool isFinish);
 };
 
 #endif //SCHEDULE_ALGORITHM_LS_H_
