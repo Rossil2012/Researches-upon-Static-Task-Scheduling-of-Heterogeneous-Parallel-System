@@ -9,12 +9,37 @@
 #include "naive/hashing.h"
 #include "naive/cpop.h"
 
-void debugPrint(const std::vector<int> &vec) {
-    for (const auto &item : vec) {
-        std::cout << item << " ";
-    }
-    std::cout << "\n";
-}
+const DeviceID device_num_ = 40;
+size_t ave_memory_ = 0;
+
+size_t task_num_ = 100;
+double task_edge_prob_ = 0.01;
+size_t output_size_high_ = 1000;
+size_t serial_num_high_ = 100;
+size_t parallel_num_high_ = 10000;
+
+bool f_ = false;
+
+#define RUN_ALL(epoch)          \
+do {                            \
+    std::cout << "Hashing:\n";  \
+    testHashing(epoch);         \
+    std::cout << "LS_ASAP:\n";  \
+    testLSASAP(epoch);          \
+    std::cout << "LS_ALAP:\n";  \
+    testLSALAP(epoch);          \
+    std::cout << "CPOP:\n";     \
+    testCPOP(epoch);            \
+    std::cout << "GA_NL:\n";    \
+    testGA(epoch);              \
+} while(0)
+
+#define RUN_RANDOM_GRAPH(epoch, num, edge_prob)             \
+do {                                                        \
+    task_num_ = (num);                                      \
+    task_edge_prob_ = (edge_prob);                          \
+    RUN_ALL(epoch);                                         \
+} while(0)
 
 void testCreateNodeListFromPriority() {
     auto graph = std::make_shared<TaskGraph>();
@@ -44,78 +69,88 @@ void testCreateNodeListFromPriority() {
 }
 
 std::vector<Tasklet> GenRandomTaskFlow() {
-    auto serial_num = RandomWithRange<size_t>(1, 100);
+    auto serial_num = RandomWithRange<size_t>(1, serial_num_high_);
 
     std::vector<Tasklet> ret;
     ret.reserve(serial_num);
 
     for (int i = 0; i < serial_num; i++) {
         auto data_type = static_cast<DataType>(RandomWithRange<int>(INT32, DOUBLE + 1));
-        ret.push_back({data_type, RandomWithRange<size_t>(1, 20000)});
+        ret.push_back({data_type, RandomWithRange<size_t>(1, parallel_num_high_)});
     }
 
     return std::move(ret);
 }
 
 TaskGraphPtr makeTaskGraph() {
-    const TaskID task_num = 10000;
-    const double task_edge_prob = 0.01;
-
-    static bool f = false;
     static auto task_graph = std::make_shared<TaskGraph>();
 
-    if (f) { return task_graph; } else { f = true; }
+    if (f_) { return task_graph; } else { task_graph = std::make_shared<TaskGraph>(); }
 
     task_graph->NewTask(0, std::vector<Tasklet>()); // manual source node
 
-    for (int i = 1; i < task_num - 1; i++) {
-        task_graph->NewTask(RandomWithRange<size_t>(10, 1000), GenRandomTaskFlow());
+    for (int i = 1; i < task_num_ - 1; i++) {
+        task_graph->NewTask(RandomWithRange<size_t>(1, output_size_high_), GenRandomTaskFlow());
     }
 
     task_graph->NewTask(0, std::vector<Tasklet>()); // manual sink node
 
-    auto task_shuffled = GenIncPriorVector<TaskID>(task_num);
+    auto task_shuffled = GenIncPriorVector<TaskID>(task_num_);
     ShuffleVector(task_shuffled);
 
     for (auto &from_ : task_shuffled) {
-        for (TaskID to_ = from_ + 1; to_ < task_num; to_++) {
-            if (RandomWithProbability(task_edge_prob)) {
+        for (TaskID to_ = from_ + 1; to_ < task_num_; to_++) {
+            if (RandomWithProbability(task_edge_prob_)) {
                 task_graph->AddEdge(from_, to_);
             }
         }
     }
 
-    for (int i = 1; i < task_num - 1; i++) {
+    for (int i = 1; i < task_num_ - 1; i++) {
         auto cur = task_graph->GetTask(i);
         if (cur->in_nodes.empty()) {
             task_graph->AddEdge(0, i);
         }
         if (cur->out_nodes.empty()) {
-            task_graph->AddEdge(i, task_num - 1);
+            task_graph->AddEdge(i, task_num_ - 1);
         }
     }
+
+    size_t total_memory = 0;
+    auto callback = [&total_memory](TaskPtr &task) {
+        total_memory += task->MemorySize();
+    };
+
+    task_graph->Traverse(callback);
+
+    ave_memory_ = total_memory / device_num_;
 
     return task_graph;
 }
 
 DeviceGraphPtr makeDeviceGraph() {
-    const DeviceID device_num = 5;
-
-    static bool f = false;
     static auto device_graph = std::make_shared<DeviceGraph>();
 
-    if (f) { return device_graph; } else { f = true; }
+    if (f_) { return device_graph; } else { device_graph = std::make_shared<DeviceGraph>(); }
 
-    device_graph->NewCPU(CPU::AVX512, size_t(4) << 30, 5.0, 10);
-    device_graph->NewCPU(CPU::SSE2, size_t(16) << 30, 3.8, 4);
-    device_graph->NewCPU(CPU::None, size_t(100) << 20, 2.3, 2);
-    device_graph->NewGPU(size_t(8) << 30, 1.3, 2000);
-    device_graph->NewGPU(size_t(4) << 30, 1.8, 4000);
+    DeviceID cur_device_num = 0;
+    for (int simd = CPU::None; simd <= CPU::AVX512; simd++) {
+        for (int i = 0; i < 5; i++) {
+            device_graph->NewCPU(CPU::SIMD(simd), RandomWithRange<size_t>(ave_memory_, ave_memory_*3),
+                RandomWithRange<int>(20, 50) / 10.0, RandomWithRange<size_t>(1, 16));
+        }
+        cur_device_num += 5;
+    }
+
+    for (int i = 0; i < device_num_ - cur_device_num; i++) {
+        device_graph->NewGPU(RandomWithRange<size_t>(ave_memory_, ave_memory_*3),
+            RandomWithRange<int>(5, 20) / 10.0, RandomWithRange<int>(500, 5000));
+    }
 
     device_graph->NewNodeFinished();
 
-    for (int i = 0 ; i < device_num; i++) {
-        for (int j = i + 1; j < device_num; j++) {
+    for (int i = 0 ; i < device_num_; i++) {
+        for (int j = i + 1; j < device_num_; j++) {
             device_graph->AddEdge(i, j, RandomWithRange<size_t>(100, 10000));
         }
     }
@@ -123,82 +158,115 @@ DeviceGraphPtr makeDeviceGraph() {
     return device_graph;
 }
 
-void testGA() {
-    auto task_graph = makeTaskGraph();
-    auto device_graph = makeDeviceGraph();
+void testGA(int epoch) {
+    LogicalTime tot_exec_time = 0;
+    int epoch_ = epoch;
+    std::vector<LogicalTime> tot_exec_results;
 
-    auto ga_nl = GA_NL(task_graph->Clone(), device_graph->Clone(), 10);
+    while (epoch_-- > 0) {
+        auto task_graph = makeTaskGraph();
+        auto device_graph = makeDeviceGraph();
 
-    ga_nl.ScheduleWithMaxEpoch(100);
+        auto ga_nl = GA_NL(task_graph->Clone(), device_graph->Clone(), 10);
 
-    std::cout << ga_nl.GetResult().exec_time;
+        auto exec_results = ga_nl.ScheduleWithMaxEpoch(100);
+
+        if (tot_exec_results.empty()) {
+            for (auto exec_result : exec_results) {
+                tot_exec_results.push_back(exec_result);
+            }
+        } else {
+            for (size_t i = 0; i < exec_results.size(); i++) {
+                tot_exec_results[i] += exec_results[i];
+            }
+        }
+
+        tot_exec_time += exec_results.back();
+    }
+
+    for (const auto &result : tot_exec_results) {
+        std::cout << result / epoch << " ";
+    }
+    std::cout << "\n";
+
+    std::cout << tot_exec_time / double(epoch) << "\n";
 }
 
-void testLSASAP() {
-    auto task_graph = makeTaskGraph();
-    auto device_graph = makeDeviceGraph();
+void testLSASAP(int epoch) {
+    LogicalTime tot_exec_time = 0;
+    int epoch_ = epoch;
+    while (epoch_-- > 0) {
+        auto task_graph = makeTaskGraph();
+        auto device_graph = makeDeviceGraph();
 
-    auto ls_asap = LS_ASAP(task_graph->Clone(), device_graph->Clone());
+        auto ls_asap = LS_ASAP(task_graph->Clone(), device_graph->Clone());
 
-    ls_asap.Schedule();
-
-    std::cout << ls_asap.GetExecTime() << "\n";
-
-//    for (const auto &allocated_to : ls_asap.GetProcessorAllocation()) {
-//        std::cout << allocated_to << " ";
-//    }
-//    std::cout << "\n";
-//
-//    for (const auto &node : ls_asap.GetNodeList()) {
-//        std::cout << node->node_id << " ";
-//    }
-//    std::cout << "\n";
+        ls_asap.Schedule();
+        tot_exec_time += ls_asap.GetExecTime();
+    }
+    std::cout << tot_exec_time / double(epoch) << "\n";
 }
 
-void testLSALAP() {
-    auto task_graph = makeTaskGraph();
-    auto device_graph = makeDeviceGraph();
+void testLSALAP(int epoch) {
+    LogicalTime tot_exec_time = 0;
+    int epoch_ = epoch;
 
-    auto ls_alap = LS_ALAP(task_graph->Clone(), device_graph->Clone());
+    while (epoch_-- > 0) {
+        auto task_graph = makeTaskGraph();
+        auto device_graph = makeDeviceGraph();
 
-    ls_alap.Schedule();
+        auto ls_alap = LS_ALAP(task_graph->Clone(), device_graph->Clone());
 
-    std::cout << ls_alap.GetExecTime() << "\n";
+        ls_alap.Schedule();
+        tot_exec_time += ls_alap.GetExecTime();
+    }
+
+    std::cout << tot_exec_time / double(epoch) << "\n";
 }
 
-void testHashing() {
-    auto task_graph = makeTaskGraph();
-    auto device_graph = makeDeviceGraph();
+void testHashing(int epoch) {
+    LogicalTime tot_exec_time = 0;
+    int epoch_ = epoch;
 
-    auto hashing = Hashing(task_graph->Clone(), device_graph->Clone());
-    hashing.Schedule();
+    while (epoch_-- > 0) {
+        auto task_graph = makeTaskGraph();
+        auto device_graph = makeDeviceGraph();
 
-    std::cout << hashing.GetExecTime() << "\n";
+        auto hashing = Hashing(task_graph->Clone(), device_graph->Clone());
+
+        hashing.Schedule();
+        tot_exec_time += hashing.GetExecTime();
+    }
+
+    std::cout << tot_exec_time / double(epoch) << "\n";
 }
 
-void testCPOP() {
-    auto task_graph = makeTaskGraph();
-    auto device_graph = makeDeviceGraph();
+void testCPOP(int epoch) {
+    LogicalTime tot_exec_time = 0;
+    int epoch_ = epoch;
 
-    auto cpop = CPOP(task_graph->Clone(), device_graph->Clone());
-    cpop.Schedule();
+    while (epoch_-- > 0) {
+        auto task_graph = makeTaskGraph();
+        auto device_graph = makeDeviceGraph();
 
-    std::cout << cpop.GetExecTime() << "\n";
+        auto cpop = CPOP(task_graph->Clone(), device_graph->Clone());
+        cpop.Schedule();
+        tot_exec_time += cpop.GetExecTime();
+    }
+
+    std::cout << tot_exec_time / double(epoch) << "\n";
 }
 
 int main() {
-//    testCreateNodeListFromPriority();
-    Init();
-    std::cout << "CPOP:\n";
-    testCPOP();
-//    std::cout << "Hashing:\n";
-//    testHashing();
-//    std::cout << "LS_ASAP:\n";
-//    testLSASAP();
-//    std::cout << "LS_ALAP:\n";
-//    testLSALAP();
-//    std::cout << "GA_NL:\n";
-//    testGA();
+    try {
+        Init();
+        RUN_RANDOM_GRAPH(50, 1000, 0.01);
+//    RUN_RANDOM_GRAPH(50, 1000, 0.01);
+//    RUN_RANDOM_GRAPH(50, 10000, 0.01);
+    } catch (const char *msg) {
+        std::cout << msg << "\n";
+        return -1;
+    }
 
     return 0;
 }
