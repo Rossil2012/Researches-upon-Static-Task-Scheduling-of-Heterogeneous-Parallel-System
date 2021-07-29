@@ -7,6 +7,7 @@ void LS_PA::Schedule() {
 
 void LS_PA::phaseProcessorAllocation() {}
 
+// ending technique: first available first run
 void LS_PA::phaseNodeList() {
     auto callback = [this](TaskPtr &cur) {
         LogicalTime data_ready_time = 0;
