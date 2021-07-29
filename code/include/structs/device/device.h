@@ -61,7 +61,7 @@ public:
         return task_record_.at(task_id);
     }
 
-    inline size_t AvailMemory() const {
+    inline size_t &AvailMemory() {
         return avail_memory_;
     }
 
@@ -99,7 +99,7 @@ public:
           num_core_(num_core) {
         switch (support_isa) {
             case None:
-                process_cap = {8, 8, 8, 8};
+                process_cap = {1, 1, 1, 1};
                 break;
             case MMX:
                 process_cap = {16, 8, 8, 8};
