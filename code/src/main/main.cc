@@ -41,33 +41,6 @@ do {                                                        \
     RUN_ALL(epoch);                                         \
 } while(0)
 
-void testCreateNodeListFromPriority() {
-    auto graph = std::make_shared<TaskGraph>();
-    std::vector<size_t> priority = {12, 13, 2, 4, 6, 8, 1, 3, 5, 7, 9, 11, 10};
-    for (auto &i : priority) {
-        std::cout << graph->NewNode() << " ";
-    }
-    std::cout << "\n";
-
-    for (int i = 2; i < 6; i++) {
-        graph->AddEdge(0, i);
-        graph->AddEdge(i, 11);
-    }
-
-    for (int i = 6; i <= 10; i++) {
-        graph->AddEdge(1, i);
-        graph->AddEdge(i, 12);
-    }
-
-    graph->AddEdge(2, 10);
-
-    auto nl = CreateNodeListFromPriority(graph, priority);
-    for (const auto &task : nl) {
-        std::cout << task->node_id << " ";
-    }
-    std::cout << "\n";
-}
-
 std::vector<Tasklet> GenRandomTaskFlow() {
     auto serial_num = RandomWithRange<size_t>(1, serial_num_high_);
 
@@ -260,7 +233,7 @@ void testCPOP(int epoch) {
 int main() {
     try {
         Init();
-        RUN_RANDOM_GRAPH(50, 1000, 0.01);
+        RUN_RANDOM_GRAPH(50, 100, 0.01);
 //    RUN_RANDOM_GRAPH(50, 1000, 0.01);
 //    RUN_RANDOM_GRAPH(50, 10000, 0.01);
     } catch (const char *msg) {

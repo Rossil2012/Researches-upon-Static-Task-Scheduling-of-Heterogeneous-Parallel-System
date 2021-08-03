@@ -42,8 +42,7 @@ void CPOP::Schedule() {
 
     // recursively assign tasks in cp to devices to minimize cp execution, with memory constraint
     TypePA processor_allocation(task_graph_->GetNodeNum());
-    LogicalTime cp_exec_time = getMinimumPathAllocation(all_devices, 0, critical_path, 0, &processor_allocation);
-//    printf("CPOP cp_exec_time: %llu", cp_exec_time);
+    getMinimumPathAllocation(all_devices, 0, critical_path, 0, &processor_allocation);
 
     auto task_callback = [&processor_allocation, &priority, cp_priority, this](TaskPtr &task) {
         if (priority[task->node_id] == cp_priority) { // tasks that have been allocated on the critical path
